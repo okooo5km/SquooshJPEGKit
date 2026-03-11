@@ -20,7 +20,7 @@ swift build -c release  # Release build
   - `jsimd_none.c` — SIMD stubs for --without-simd builds
 - `Sources/CSquooshRotate/` — C rotation (ported from Squoosh rotate.rs, 16x16 tile)
 - `Sources/CSquooshResize/` — C resize (ported from Squoosh resize crate 0.5.5, separable convolution)
-- `Sources/SquooshJPEGKit/` — Swift public API (encoder, rotate, resize, pipeline)
+- `Sources/SquooshJPEGKit/` — Swift public API (encoder, rotate, resize, pipeline, metadata)
 - `Tests/SquooshJPEGKitTests/` — Swift Testing framework tests
 - `Vendor/mozjpeg-3.3.1/` — Full MozJPEG source (reference only)
 - `Scripts/` — Tooling scripts
