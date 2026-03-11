@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <pthread.h>
 #include "squoosh_resize.h"
 
 // ============================================================================
@@ -17,7 +18,7 @@
 // 256-entry LUT: sRGB byte -> linear float
 // Generated from srgb_to_linear() for values 0..255
 static float SRGB_TO_LINEAR_LUT[256];
-static int srgb_lut_initialized = 0;
+static pthread_once_t srgb_lut_once = PTHREAD_ONCE_INIT;
 
 static float srgb_to_linear(float v) {
     if (v < 0.04045f) {
@@ -44,12 +45,14 @@ static float linear_to_srgb(float v) {
     }
 }
 
-static void init_srgb_lut(void) {
-    if (srgb_lut_initialized) return;
+static void init_srgb_lut_impl(void) {
     for (int i = 0; i < 256; i++) {
         SRGB_TO_LINEAR_LUT[i] = srgb_to_linear((float)i / 255.0f);
     }
-    srgb_lut_initialized = 1;
+}
+
+static void init_srgb_lut(void) {
+    pthread_once(&srgb_lut_once, init_srgb_lut_impl);
 }
 
 // ============================================================================
