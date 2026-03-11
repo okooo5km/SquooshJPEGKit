@@ -16,18 +16,15 @@ let package = Package(
             publicHeadersPath: "include",
             cSettings: [
                 .define("NO_GETENV"),
-                .unsafeFlags(["-w"]),
             ]
         ),
         .target(
             name: "CSquooshRotate",
-            publicHeadersPath: "include",
-            cSettings: [.unsafeFlags(["-w"])]
+            publicHeadersPath: "include"
         ),
         .target(
             name: "CSquooshResize",
-            publicHeadersPath: "include",
-            cSettings: [.unsafeFlags(["-w"])]
+            publicHeadersPath: "include"
         ),
         .target(
             name: "SquooshJPEGKit",
