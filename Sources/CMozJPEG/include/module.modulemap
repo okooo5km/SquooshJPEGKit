@@ -1,0 +1,5 @@
+module CMozJPEG {
+    header "squoosh_jpeg_shim.h"
+    link "CMozJPEG"
+    export *
+}
