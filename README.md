@@ -1,10 +1,10 @@
 # SquooshJPEGKit
 
-A Swift Package that provides JPEG encoding strictly aligned with [Google Squoosh](https://squoosh.app)'s MozJPEG behavior.
+A Swift Package that provides JPEG encoding, image rotation, resizing, and metadata handling — all strictly aligned with [Google Squoosh](https://squoosh.app)'s behavior.
 
 ## Overview
 
-SquooshJPEGKit wraps MozJPEG 3.3.1 with a C shim that mirrors Squoosh's `mozjpeg_enc.cpp` encode flow step-by-step, ensuring identical output for the same input and options.
+SquooshJPEGKit wraps MozJPEG 3.3.1 with a C shim that mirrors Squoosh's `mozjpeg_enc.cpp` encode flow step-by-step. It also ports Squoosh's rotate (from `rotate.rs`) and resize (from the `resize` crate 0.5.5) implementations to C, ensuring identical output for the same input and options.
 
 ## Requirements
 
@@ -23,28 +23,62 @@ dependencies: [
 
 ## Usage
 
+### Basic Encoding
+
 ```swift
 import SquooshJPEGKit
 
-// Create an RGBA image
 let image = try RGBAImage(width: 100, height: 100, data: rgbaData)
-
-// Encode with Squoosh defaults
 let encoder = SquooshJPEGEncoder()
 let result = try encoder.encode(image)
-
-// Access the JPEG data
 let jpegData = result.data
+```
 
-// Check diagnostics
-print("Progressive: \(result.diagnostics.isProgressive)")
-print("Scan count: \(result.diagnostics.scanCount)")
+### Rotate and Resize
 
-// Custom options
-var options = SquooshMozJPEGOptions.squooshDefault
-options.quality = 85
-options.quantTable = 2
-let customResult = try encoder.encode(image, options: options)
+```swift
+let processor = SquooshImageProcessor()
+
+// Rotate 90°
+let rotated = try processor.rotate(image, by: .clockwise90)
+
+// Resize with Lanczos3
+let resized = try processor.resize(image, options: SquooshResizeOptions(
+    width: 400, height: 300,
+    filter: .lanczos3,
+    premultiply: true,
+    colorSpaceConversion: true
+))
+```
+
+### Full Pipeline (rotate → resize → encode)
+
+```swift
+let pipeline = SquooshPipeline()
+let options = SquooshPipelineOptions(
+    rotation: .clockwise90,
+    resize: SquooshResizeOptions(width: 800, height: 600, filter: .lanczos3),
+    encode: .squooshDefault,
+    metadataPolicy: .preserveICCOnly,
+    sourceJPEGData: originalJPEGData
+)
+let result = try pipeline.process(image, options: options)
+```
+
+### Metadata Policies
+
+```swift
+// Drop all metadata (Squoosh default)
+.dropAll
+
+// Preserve ICC color profile only
+.preserveICCOnly
+
+// Preserve ICC + safe EXIF (strip GPS, set orientation to 1)
+.preserveSafe
+
+// Preserve all APP and COM markers
+.preserveAllRecognized
 ```
 
 ## Squoosh Default Options
@@ -70,8 +104,10 @@ let customResult = try encoder.encode(image, options: options)
 
 ## Architecture
 
-- **CMozJPEG**: C target containing vendored MozJPEG 3.3.1 encoder sources and a C shim (`squoosh_jpeg_shim.c`) that mirrors Squoosh's encoding flow
-- **SquooshJPEGKit**: Swift target providing the public API
+- **CMozJPEG**: Vendored MozJPEG 3.3.1 encoder + C shim mirroring Squoosh's encode flow
+- **CSquooshRotate**: 0/90/180/270° rotation with 16x16 tile algorithm (ported from `rotate.rs`)
+- **CSquooshResize**: Separable convolution resize with Triangle/Catrom/Mitchell/Lanczos3 filters, sRGB↔Linear conversion, alpha premultiply (ported from `resize` crate 0.5.5)
+- **SquooshJPEGKit**: Swift API — encoder, processor, pipeline, metadata, diagnostics
 
 ## License
 
