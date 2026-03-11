@@ -1,0 +1,5 @@
+module CSquooshRotate {
+    header "squoosh_rotate.h"
+    link "CSquooshRotate"
+    export *
+}

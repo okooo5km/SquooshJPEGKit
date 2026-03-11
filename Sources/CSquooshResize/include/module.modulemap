@@ -1,0 +1,5 @@
+module CSquooshResize {
+    header "squoosh_resize.h"
+    link "CSquooshResize"
+    export *
+}

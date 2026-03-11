@@ -20,8 +20,18 @@ let package = Package(
             ]
         ),
         .target(
+            name: "CSquooshRotate",
+            publicHeadersPath: "include",
+            cSettings: [.unsafeFlags(["-w"])]
+        ),
+        .target(
+            name: "CSquooshResize",
+            publicHeadersPath: "include",
+            cSettings: [.unsafeFlags(["-w"])]
+        ),
+        .target(
             name: "SquooshJPEGKit",
-            dependencies: ["CMozJPEG"]
+            dependencies: ["CMozJPEG", "CSquooshRotate", "CSquooshResize"]
         ),
         .testTarget(
             name: "SquooshJPEGKitTests",

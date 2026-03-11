@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Swift Package providing JPEG encoding aligned with Google Squoosh's MozJPEG behavior.
+Swift Package providing JPEG encoding, image rotation, and resizing aligned with Google Squoosh's behavior.
 
 ## Build & Test
 
@@ -18,7 +18,9 @@ swift build -c release  # Release build
   - `include/` — Public headers, jconfig.h, module.modulemap
   - `squoosh_jpeg_shim.c` — C shim mirroring Squoosh's mozjpeg_enc.cpp
   - `jsimd_none.c` — SIMD stubs for --without-simd builds
-- `Sources/SquooshJPEGKit/` — Swift public API
+- `Sources/CSquooshRotate/` — C rotation (ported from Squoosh rotate.rs, 16x16 tile)
+- `Sources/CSquooshResize/` — C resize (ported from Squoosh resize crate 0.5.5, separable convolution)
+- `Sources/SquooshJPEGKit/` — Swift public API (encoder, rotate, resize, pipeline)
 - `Tests/SquooshJPEGKitTests/` — Swift Testing framework tests
 - `Vendor/mozjpeg-3.3.1/` — Full MozJPEG source (reference only)
 - `Scripts/` — Tooling scripts
@@ -42,4 +44,8 @@ swift build -c release  # Release build
 ## Squoosh Reference
 
 The reference Squoosh source is at `/Users/5km/Dev/Web/squoosh`.
-Key file: `codecs/mozjpeg/enc/mozjpeg_enc.cpp` (encode function, lines 60-216).
+Key files:
+- `codecs/mozjpeg/enc/mozjpeg_enc.cpp` (encode function, lines 60-216)
+- `codecs/rotate/rotate.rs` (rotation with 16x16 tiles)
+- `codecs/resize/src/lib.rs` (resize with `resize` crate 0.5.5)
+- `codecs/resize/src/srgb.rs` (sRGB↔Linear conversion)
